@@ -75,6 +75,9 @@ function BreathingModal({ open, onClose }) {
     "Hold... 1 2 3 4",
     "Exhale... 1 2 3 4 5 6",
   ];
+  // Split step into title and numbers for better centering
+  const [title, ...numbers] = steps[step].split('...');
+  const numbersArr = numbers.join('').trim().split(' ');
   return (
     <AnimatePresence>
       {open && (
@@ -104,8 +107,13 @@ function BreathingModal({ open, onClose }) {
               transition={{ repeat: Infinity, duration: 4 }}
               className="mb-6"
             >
-              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-2xl text-emerald-600 font-bold">
-                {steps[step]}
+              <div className="w-36 h-36 bg-emerald-100 rounded-full flex flex-col items-center justify-center text-emerald-600 font-bold text-center shadow-lg">
+                <span className="text-2xl mb-1">{title}...</span>
+                <span className="text-2xl">
+                  {numbersArr.map((num, i) => (
+                    <span key={i} className="inline-block mr-1">{num}</span>
+                  ))}
+                </span>
               </div>
             </motion.div>
             <button

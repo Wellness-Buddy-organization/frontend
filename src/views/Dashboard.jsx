@@ -1,14 +1,14 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import { useState, useEffect, Suspense, lazy } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import axios from "axios";
 
 // Lazy load widgets for performance
-const CalendarWidget = lazy(() => import('../components/CalendarWidget'));
-const MoodTracker = lazy(() => import('../components/MoodTracker'));
-const SleepTracker = lazy(() => import('../components/SleepTracker'));
-const HydrationTracker = lazy(() => import('../components/HydrationTracker'));
-const WorkTracker = lazy(() => import('../components/WorkTracker'));
+const CalendarWidget = lazy(() => import("../components/CalendarWidget"));
+const MoodTracker = lazy(() => import("../components/MoodTracker"));
+const SleepTracker = lazy(() => import("../components/SleepTracker"));
+const HydrationTracker = lazy(() => import("../components/HydrationTracker"));
+const WorkTracker = lazy(() => import("../components/WorkTracker"));
 
 // Skeleton loader for suspense fallback
 const SkeletonLoader = () => (
@@ -24,7 +24,7 @@ const SkeletonLoader = () => (
 );
 
 const Dashboard = () => {
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [wellnessData, setWellnessData] = useState({
     mood: [],
     sleep: [],
@@ -39,15 +39,18 @@ const Dashboard = () => {
     const controller = new AbortController();
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          navigate('/unauthorized');
+          navigate("/unauthorized");
           return;
         }
-        const response = await axios.get('http://localhost:5000/api/dashboard/me', {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal,
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/dashboard/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          }
+        );
         setUserName(response.data.user.fullName);
         setWellnessData(response.data.wellness);
         setIsLoading(false);
@@ -55,11 +58,14 @@ const Dashboard = () => {
         if (axios.isCancel(err)) return;
         // Handle 401 Unauthorized or session timeout (e.g., 419/440)
         if (err.response?.status === 401) {
-          navigate('/unauthorized');
-        } else if (err.response?.status === 419 || err.response?.status === 440) {
-          navigate('/timeout');
+          navigate("/unauthorized");
+        } else if (
+          err.response?.status === 419 ||
+          err.response?.status === 440
+        ) {
+          navigate("/timeout");
         } else {
-          setError(err.message || 'Failed to load dashboard data');
+          setError(err.message || "Failed to load dashboard data");
           setIsLoading(false);
         }
       }
@@ -70,9 +76,9 @@ const Dashboard = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { 
+      transition: {
         staggerChildren: 0.15,
         delayChildren: 0.2,
       },
@@ -81,12 +87,12 @@ const Dashboard = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
-        type: 'spring', 
-        stiffness: 300, 
+      transition: {
+        type: "spring",
+        stiffness: 300,
         damping: 24,
       },
     },
@@ -95,11 +101,11 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity }}
-          className="h-24 w-24 border-8 border-emerald-200 border-t-emerald-500 rounded-full"
-        />
+        <div className="relative h-24 w-24">
+          <div className="absolute inset-0 border-4 border-emerald-200 rounded-full animate-pulse"></div>
+          <div className="absolute inset-2 border-4 border-emerald-400 rounded-full animate-pulse"></div>
+          <div className="absolute inset-4 border-4 border-emerald-600 rounded-full animate-pulse"></div>
+        </div>
       </div>
     );
   }
@@ -112,7 +118,9 @@ const Dashboard = () => {
         className="flex flex-col items-center justify-center h-screen p-4"
       >
         <div className="bg-red-50 p-6 rounded-lg max-w-md text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Data</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading Data
+          </h2>
           <p className="text-red-700 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
@@ -132,19 +140,20 @@ const Dashboard = () => {
       variants={containerVariants}
       className="max-w-7xl mx-auto p-4"
     >
-      <motion.div 
+      <motion.div
         variants={itemVariants}
         className="mb-8 text-center md:text-left"
       >
-        <h1 className="text-3xl font-bold text-gray-800">Good Morning {userName}!</h1>
-        <p className="text-xl text-gray-600">Here's Your Weekly Wellness Summary</p>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Good Morning {userName}!
+        </h1>
+        <p className="text-xl text-gray-600">
+          Here's Your Weekly Wellness Summary
+        </p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div 
-          variants={itemVariants}
-          className="lg:col-span-2"
-        >
+        <motion.div variants={itemVariants} className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Suspense fallback={<SkeletonLoader />}>
               <motion.div variants={itemVariants}>

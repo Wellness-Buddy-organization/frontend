@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
@@ -41,6 +42,8 @@ const Reminders = () => {
   const [loading, setLoading] = useState(true);
   const [notif, setNotif] = useState({ message: '', type: '' });
 
+  const navigate = useNavigate();
+
   const token = localStorage.getItem('token');
   const api = axios.create({
     baseURL: '/api',
@@ -54,15 +57,19 @@ const Reminders = () => {
         setLoading(true);
         const res = await api.get('/reminder');
         setReminders(res.data);
-      } catch {
-        setNotif({ message: 'Failed to load reminders.', type: 'error' });
+      } catch (err) {
+        if (err.response?.status === 401) {
+          navigate('/unauthorized');
+        } else {
+          setNotif({ message: 'Failed to load reminders.', type: 'error' });
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchReminders();
     // eslint-disable-next-line
-  }, []);
+  }, [navigate]);
 
   // Add or update reminder
   const handleSubmit = async (e) => {
@@ -79,8 +86,12 @@ const Reminders = () => {
       }
       setForm({ type: 'water', time: '', enabled: true });
       setEditingId(null);
-    } catch {
-      setNotif({ message: 'Failed to save reminder.', type: 'error' });
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/unauthorized');
+      } else {
+        setNotif({ message: 'Failed to save reminder.', type: 'error' });
+      }
     }
   };
 
@@ -90,8 +101,12 @@ const Reminders = () => {
       await api.delete(`/reminder/${id}`);
       setReminders(reminders.filter(r => r._id !== id));
       setNotif({ message: 'Reminder deleted.', type: 'success' });
-    } catch {
-      setNotif({ message: 'Failed to delete reminder.', type: 'error' });
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/unauthorized');
+      } else {
+        setNotif({ message: 'Failed to delete reminder.', type: 'error' });
+      }
     }
   };
 
@@ -182,7 +197,13 @@ const Reminders = () => {
 
       <div className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-8">
         {loading ? (
-          <div className="text-center text-emerald-500">Loading reminders...</div>
+          <div className="flex justify-center items-center h-32">
+            <div className="relative h-16 w-16">
+              <div className="absolute inset-0 border-4 border-emerald-200 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 border-4 border-emerald-400 rounded-full animate-pulse"></div>
+              <div className="absolute inset-4 border-4 border-emerald-600 rounded-full animate-pulse"></div>
+            </div>
+          </div>
         ) : reminders.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No reminders set. Add one above!</div>
         ) : (

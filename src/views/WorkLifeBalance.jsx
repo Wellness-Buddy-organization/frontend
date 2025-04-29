@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Demo productivity insights (in a real app, fetch from backend)
@@ -16,6 +17,19 @@ const quotes = [
   "A healthy outside starts from the inside.",
   "You will never feel truly satisfied by work until you are satisfied by life.",
 ];
+
+// Loader
+function Loader() {
+  return (
+    <div className="flex justify-center items-center h-40">
+      <div className="relative h-16 w-16">
+        <div className="absolute inset-0 border-4 border-emerald-200 rounded-full animate-pulse"></div>
+        <div className="absolute inset-2 border-4 border-emerald-400 rounded-full animate-pulse"></div>
+        <div className="absolute inset-4 border-4 border-emerald-600 rounded-full animate-pulse"></div>
+      </div>
+    </div>
+  );
+}
 
 // Break reminder modal
 function BreakReminderModal({ open, onClose }) {
@@ -58,6 +72,10 @@ function BreakReminderModal({ open, onClose }) {
 }
 
 const WorkLifeBalance = () => {
+  // If you add backend integration, use loading/unauthorized state
+  const [loading] = useState(false); // set to true when fetching async data
+  const navigate = useNavigate(); // For unauthorized navigation if needed
+
   const [workHours, setWorkHours] = useState('');
   const [breaks, setBreaks] = useState(0);
   const [screenTime, setScreenTime] = useState('');
@@ -73,6 +91,13 @@ const WorkLifeBalance = () => {
     setBreaks(breaks + 1);
     setReminderOpen(true);
   };
+
+  // Example: If you add backend, handle 401 like this
+  // useEffect(() => {
+  //   if (/* unauthorized condition */) navigate('/unauthorized');
+  // }, [navigate]);
+
+  if (loading) return <Loader />;
 
   return (
     <motion.div
