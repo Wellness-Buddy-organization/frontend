@@ -13,8 +13,7 @@ const HydrationTracker = ({ data }) => {
 
   // Process the backend data into a 7-day array
   const hydrationData = useMemo(() => {
-    console.log("Original hydration data:", data);
-    
+  
     // Get the current date
     const today = new Date();
     
@@ -23,7 +22,6 @@ const HydrationTracker = ({ data }) => {
     startDate.setDate(today.getDate() - 6); // Get 6 days before today to make a 7-day window
     startDate.setHours(0, 0, 0, 0);
     
-    console.log("Start date for 7-day window:", startDate);
     
     // Initialize the 7-day array with dates and 0 amount
     const weeklyData = Array(7).fill(null).map((_, index) => {
@@ -60,7 +58,6 @@ const HydrationTracker = ({ data }) => {
       });
     }
     
-    console.log("Processed weekly hydration data:", weeklyData);
     return weeklyData;
   }, [data]);
 

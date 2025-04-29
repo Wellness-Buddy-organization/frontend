@@ -10,8 +10,7 @@ const SleepTracker = ({ data }) => {
 
   // Process the backend data into a 7-day array
   const sleepData = useMemo(() => {
-    console.log("Original sleep data:", data);
-    
+
     // Get the current date
     const today = new Date();
     
@@ -19,8 +18,7 @@ const SleepTracker = ({ data }) => {
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - 6); // Get 6 days before today to make a 7-day window
     startDate.setHours(0, 0, 0, 0);
-    
-    console.log("Start date for 7-day window:", startDate);
+  
     
     // Initialize the 7-day array with dates and 0 hours
     const weeklyData = Array(7).fill(null).map((_, index) => {
@@ -57,7 +55,6 @@ const SleepTracker = ({ data }) => {
       });
     }
     
-    console.log("Processed weekly sleep data:", weeklyData);
     return weeklyData;
   }, [data]);
 

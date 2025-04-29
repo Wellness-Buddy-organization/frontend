@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 const moodMapping = {
-  happy:   { value: 5, emoji: '😁' },
-  sad:     { value: 2, emoji: '😔' },
-  neutral: { value: 3, emoji: '😐' },
   angry:   { value: 1, emoji: '😠' },
-  anxious: { value: 2, emoji: '😟' },
+  sad:     { value: 2, emoji: '😔' },
+  anxious: { value: 3, emoji: '😰' },
+  neutral: { value: 4, emoji: '😐' },
+  happy:   { value: 5, emoji: '😁' },
 };
 
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

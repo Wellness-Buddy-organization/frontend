@@ -33,7 +33,6 @@ const Dashboard = () => {
         });
         setUserName(response.data.user.fullName);
         setWellnessData(response.data.wellness);
-        console.log(response.data.wellness);
         setIsLoading(false);
       } catch (err) {
         setError(err.message || 'Failed to load dashboard data');

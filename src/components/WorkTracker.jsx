@@ -10,7 +10,6 @@ const WorkTracker = ({ data }) => {
 
   // Process the backend data into a 7-day array
   const workData = useMemo(() => {
-    console.log("Original data:", data);
     
     // Get the current date (April 28, 2025)
     const today = new Date();
@@ -20,7 +19,6 @@ const WorkTracker = ({ data }) => {
     startDate.setDate(today.getDate() - 6); // Get 6 days before today to make a 7-day window
     startDate.setHours(0, 0, 0, 0);
     
-    console.log("Start date for 7-day window:", startDate);
     
     // Initialize the 7-day array with dates and 0 hours
     const weeklyData = Array(7).fill(null).map((_, index) => {
@@ -57,7 +55,6 @@ const WorkTracker = ({ data }) => {
       });
     }
     
-    console.log("Processed weekly data:", weeklyData);
     return weeklyData;
   }, [data]);
 
