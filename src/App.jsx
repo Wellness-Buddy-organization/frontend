@@ -1,19 +1,27 @@
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
-import Landing from './views/Landing';
-import Login from './views/Login';
-import Dashboard from './views/Dashboard';
-import AuthCallback from './views/AuthCallback';
-import Signup from './views/Signup';
-import Layout from './components/Layout';
-import WellnessTracking from './views/WellnessTracking';
-import Reminders from './views/Reminders';
-import MentalHealth from './views/MentalHealth';
-import WorkLifeBalance from './views/WorkLifeBalance';
-import Settings from './views/Settings';
-import { AnimatePresence } from 'framer-motion';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import Landing from "./views/Landing";
+import Login from "./views/Login";
+import Dashboard from "./views/Dashboard";
+import AuthCallback from "./views/AuthCallback";
+import Signup from "./views/Signup";
+import Layout from "./components/Layout";
+import WellnessTracking from "./views/WellnessTracking";
+import Reminders from "./views/Reminders";
+import MentalHealth from "./views/MentalHealth";
+import WorkLifeBalance from "./views/WorkLifeBalance";
+import Settings from "./views/Settings";
+import { AnimatePresence } from "framer-motion";
+import Unauthorized from "./views/Unauthorized";
+import Timeout from "./views/Timeout";
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
@@ -25,6 +33,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/timeout" element={<Timeout />} />
           <Route path="/dashboard" element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route index element={<Dashboard />} />
