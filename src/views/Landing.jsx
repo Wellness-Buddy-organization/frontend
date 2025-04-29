@@ -21,7 +21,7 @@ const Landing = () => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     
     // Fetch stats with error handling
-    axios.get('http://localhost:5000/api/stats')
+    axios.get(import.meta.env.VITE_API_URL+'/stats')
       .then(response => setStats(response.data))
       .catch(error => console.error('Error fetching stats:', error));
       

@@ -39,7 +39,8 @@ const Reminders = () => {
   const navigate = useNavigate();
 
   const api = axios.create({
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_URL
+,
     headers: { 
       Authorization: `Bearer ${localStorage.getItem('token')}`,
       'Content-Type': 'application/json' 

@@ -31,7 +31,7 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', {
+      const response = await axios.post(import.meta.env.VITE_API_URL+'/users/login', {
         email: formData.email,
         password: formData.password,
       });
@@ -69,7 +69,7 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = import.meta.env.VITE_API_URL+'/auth/google';
   };
 
   return (

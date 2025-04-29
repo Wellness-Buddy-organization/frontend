@@ -45,7 +45,7 @@ const Dashboard = () => {
           return;
         }
         const response = await axios.get(
-          "http://localhost:5000/api/dashboard/me",
+          import.meta.env.VITE_API_URL+"/dashboard/me",
           {
             headers: { Authorization: `Bearer ${token}` },
             signal: controller.signal,

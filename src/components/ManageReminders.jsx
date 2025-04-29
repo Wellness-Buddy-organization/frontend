@@ -20,7 +20,7 @@ export default function ManageReminders({ open, onClose, reminders, setReminders
 
   const token = localStorage.getItem('token');
   const api = axios.create({
-    baseURL: '/api',
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'

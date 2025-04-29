@@ -6,7 +6,9 @@ Setup Instructions
 Install dependencies:npm install
 
 
-Ensure the backend is running on http://localhost:5000.
+Ensure the backend is running on https://backend-production-e89cc.up.railway.app
+
+.
 Start the development server:npm start
 
 

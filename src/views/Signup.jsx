@@ -33,7 +33,7 @@ const Signup = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/signup', formData);
+      const response = await axios.post(import.meta.env.VITE_API_URL+'/users/signup', formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
       localStorage.setItem('token', response.data.token);
@@ -66,7 +66,7 @@ const Signup = () => {
   };
 
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = import.meta.env.VITE_API_URL+'/auth/google';
   };
 
   return (
