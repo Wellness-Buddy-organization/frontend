@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-// Reminder types for dropdown
 const REMINDER_TYPES = [
   { value: 'water', label: '💧 Water' },
   { value: 'meal', label: '🍽️ Meal' },
@@ -12,14 +11,10 @@ const REMINDER_TYPES = [
   { value: 'exercise', label: '🏃 Exercise' },
 ];
 
-// Animated notification (success/error)
 function Notification({ message, type, onClose }) {
   if (!message) return null;
-  const color = type === 'success'
-    ? 'bg-green-50 text-green-800'
-    : type === 'error'
-    ? 'bg-red-50 text-red-800'
-    : 'bg-blue-50 text-blue-800';
+  const color = type === 'success' ? 'bg-green-50 text-green-800' : 
+               type === 'error' ? 'bg-red-50 text-red-800' : 'bg-blue-50 text-blue-800';
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -28,7 +23,7 @@ function Notification({ message, type, onClose }) {
       className={`flex items-center p-4 mb-4 text-sm rounded-lg ${color} shadow`}
       role="alert"
     >
-      <span className="font-medium mr-2">{type === 'success' ? 'Success!' : type === 'error' ? 'Error!' : 'Info'}</span>
+      <span className="font-medium mr-2">{type === 'success' ? 'Success!' : 'Error!'}</span>
       <span className="flex-1">{message}</span>
       <button onClick={onClose} className="ml-4 text-lg font-bold leading-none">&times;</button>
     </motion.div>
@@ -41,95 +36,91 @@ const Reminders = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notif, setNotif] = useState({ message: '', type: '' });
-
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
   const api = axios.create({
     baseURL: '/api',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+    headers: { 
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json' 
+    }
   });
 
-  // Fetch reminders on mount
   useEffect(() => {
     const fetchReminders = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/reminder');
-        setReminders(res.data);
+        const { data } = await api.get('/reminder');
+        setReminders(data);
       } catch (err) {
-        if (err.response?.status === 401) {
-          navigate('/unauthorized');
-        } else {
-          setNotif({ message: 'Failed to load reminders.', type: 'error' });
-        }
+        handleApiError(err);
       } finally {
         setLoading(false);
       }
     };
     fetchReminders();
-    // eslint-disable-next-line
   }, [navigate]);
 
-  // Add or update reminder
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
-        const res = await api.put(`/reminder/${editingId}`, form);
-        setReminders(reminders.map(r => (r._id === editingId ? res.data : r)));
-        setNotif({ message: 'Reminder updated.', type: 'success' });
+        const { data } = await api.put(`/reminder/${editingId}`, form);
+        setReminders(reminders.map(r => r._id === editingId ? data : r));
+        setNotif({ message: 'Reminder updated', type: 'success' });
       } else {
-        const res = await api.post('/reminder', form);
-        setReminders([...reminders, res.data]);
-        setNotif({ message: 'Reminder added.', type: 'success' });
+        const { data } = await api.post('/reminder', form);
+        setReminders([...reminders, data]);
+        setNotif({ message: 'Reminder added', type: 'success' });
       }
-      setForm({ type: 'water', time: '', enabled: true });
-      setEditingId(null);
+      resetForm();
     } catch (err) {
-      if (err.response?.status === 401) {
-        navigate('/unauthorized');
-      } else {
-        setNotif({ message: 'Failed to save reminder.', type: 'error' });
-      }
+      handleApiError(err);
     }
   };
 
-  // Delete reminder
   const handleDelete = async (id) => {
     try {
       await api.delete(`/reminder/${id}`);
       setReminders(reminders.filter(r => r._id !== id));
-      setNotif({ message: 'Reminder deleted.', type: 'success' });
+      setNotif({ message: 'Reminder deleted', type: 'success' });
     } catch (err) {
-      if (err.response?.status === 401) {
-        navigate('/unauthorized');
-      } else {
-        setNotif({ message: 'Failed to delete reminder.', type: 'error' });
-      }
+      handleApiError(err);
     }
   };
 
-  // Edit reminder
   const handleEdit = (reminder) => {
-    setForm({ type: reminder.type, time: reminder.time, enabled: reminder.enabled });
+    setForm({ 
+      type: reminder.type, 
+      time: reminder.time, 
+      enabled: reminder.enabled 
+    });
     setEditingId(reminder._id);
   };
 
-  // Reset form
   const resetForm = () => {
     setForm({ type: 'water', time: '', enabled: true });
     setEditingId(null);
+  };
+
+  const handleApiError = (err) => {
+    if (err.response?.status === 401) {
+      navigate('/login');
+    } else {
+      setNotif({ 
+        message: err.response?.data?.message || 'Operation failed', 
+        type: 'error' 
+      });
+    }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="max-w-6xl mx-auto"
+      className="max-w-6xl mx-auto p-6"
     >
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Reminders</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Wellness Reminders</h1>
 
       <AnimatePresence>
         {notif.message && (
@@ -141,12 +132,13 @@ const Reminders = () => {
         )}
       </AnimatePresence>
 
-      <div className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-8 mb-8">
+      {/* Reminder Form */}
+      <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-md border border-emerald-100 p-6 mb-8">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
-            <label className="block text-gray-600 mb-1">Type</label>
+            <label className="block text-sm text-gray-600 mb-2">Reminder Type</label>
             <select
-              className="w-full border rounded px-2 py-1"
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
               value={form.type}
               onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
               required
@@ -156,37 +148,41 @@ const Reminders = () => {
               ))}
             </select>
           </div>
+
           <div>
-            <label className="block text-gray-600 mb-1">Time</label>
+            <label className="block text-sm text-gray-600 mb-2">Scheduled Time</label>
             <input
               type="time"
-              className="w-full border rounded px-2 py-1"
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-emerald-500"
               value={form.time}
               onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
               required
             />
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-3">
             <input
               type="checkbox"
+              id="enabled"
+              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
               checked={form.enabled}
               onChange={e => setForm(f => ({ ...f, enabled: e.target.checked }))}
-              id="enabled"
             />
-            <label htmlFor="enabled" className="text-gray-600">Enabled</label>
+            <label htmlFor="enabled" className="text-sm text-gray-600">Enabled</label>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex gap-3">
             <button
               type="submit"
-              className="bg-emerald-500 text-white px-4 py-2 rounded hover:bg-emerald-600 transition"
+              className="px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
             >
-              {editingId ? 'Update' : 'Add'}
+              {editingId ? 'Update' : 'Add Reminder'}
             </button>
             {editingId && (
               <button
                 type="button"
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
                 onClick={resetForm}
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
@@ -195,17 +191,16 @@ const Reminders = () => {
         </form>
       </div>
 
-      <div className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-8">
+      {/* Reminders List */}
+      <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-md border border-emerald-100 p-6">
         {loading ? (
           <div className="flex justify-center items-center h-32">
-            <div className="relative h-16 w-16">
-              <div className="absolute inset-0 border-4 border-emerald-200 rounded-full animate-pulse"></div>
-              <div className="absolute inset-2 border-4 border-emerald-400 rounded-full animate-pulse"></div>
-              <div className="absolute inset-4 border-4 border-emerald-600 rounded-full animate-pulse"></div>
-            </div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
           </div>
         ) : reminders.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">No reminders set. Add one above!</div>
+          <div className="text-center py-8 text-gray-500">
+            No active reminders. Start by adding one above!
+          </div>
         ) : (
           <ul className="divide-y divide-emerald-100">
             {reminders.map(reminder => (
@@ -213,24 +208,34 @@ const Reminders = () => {
                 key={reminder._id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
                 className="flex items-center justify-between py-4"
               >
-                <span className="flex items-center gap-2">
-                  {REMINDER_TYPES.find(t => t.value === reminder.type)?.label || reminder.type}
-                  <span className="text-gray-700 font-medium">{reminder.time}</span>
-                  {!reminder.enabled && <span className="ml-2 text-xs text-gray-400">(disabled)</span>}
-                </span>
-                <span className="flex gap-2">
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl">
+                    {REMINDER_TYPES.find(t => t.value === reminder.type)?.label}
+                  </span>
+                  <div>
+                    <p className="font-medium text-gray-800">{reminder.time}</p>
+                    {!reminder.enabled && (
+                      <span className="text-sm text-gray-400">(Currently paused)</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
                   <button
-                    className="text-emerald-600 hover:underline"
                     onClick={() => handleEdit(reminder)}
-                  >Edit</button>
+                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                  >
+                    Edit
+                  </button>
                   <button
-                    className="text-red-500 hover:underline"
                     onClick={() => handleDelete(reminder._id)}
-                  >Delete</button>
-                </span>
+                    className="text-red-500 hover:text-red-600 text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
               </motion.li>
             ))}
           </ul>
