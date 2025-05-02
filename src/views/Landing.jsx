@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
 import StatCard from '../components/StatCard';
 import FeatureCard from '../components/FeatureCard';
+import { fetchStats } from '../services/statsService';
 
 const Landing = () => {
   const [stats, setStats] = useState({ users: 0, programs: 0, reminders: 0 });
@@ -12,53 +12,42 @@ const Landing = () => {
     target: heroRef,
     offset: ["start start", "end start"]
   });
-  
-  // Subtle parallax effect for hero image
+
+  // Parallax effect for hero image
   const heroImageY = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  
+
   useEffect(() => {
-    // Delay visibility for subtle entrance
     const timer = setTimeout(() => setIsVisible(true), 300);
-    
-    // Fetch stats with error handling
-    axios.get(import.meta.env.VITE_API_URL+'/stats')
-      .then(response => setStats(response.data))
+
+    fetchStats()
+      .then(data => setStats(data))
       .catch(error => console.error('Error fetching stats:', error));
-      
+
     return () => clearTimeout(timer);
   }, []);
 
-  // Staggered animation for multiple elements
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.15
-      }
+      transition: { staggerChildren: 0.15 }
     }
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] } 
-    }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] } }
   };
 
   const fadeInVariants = {
     hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { duration: 0.6, ease: 'easeOut' }
-    }
+    visible: { opacity: 1, transition: { duration: 0.6, ease: 'easeOut' } }
   };
 
   return (
     <div className="min-h-screen font-poppins overflow-x-hidden relative bg-gradient-to-br from-custom-green-50 to-custom-green-100">
-      {/* Subtle Ambient Background */}
+      {/* Ambient Background */}
       <div className="fixed inset-0 z-0 opacity-30">
         <div className="absolute inset-0 bg-[url('/subtle-pattern.svg')] bg-repeat opacity-5"></div>
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-custom-green-200 rounded-full blur-3xl opacity-20 transform -translate-y-1/2 translate-x-1/3"></div>
@@ -86,7 +75,6 @@ const Landing = () => {
               Wellness <span className="text-custom-green-600">Buddy</span>
             </h1>
           </div>
-          
           <motion.nav 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -100,10 +88,7 @@ const Landing = () => {
       </motion.header>
 
       {/* Hero Section */}
-      <section 
-        ref={heroRef}
-        className="pt-32 pb-20 relative z-10"
-      >
+      <section ref={heroRef} className="pt-32 pb-20 relative z-10">
         <AnimatePresence>
           {isVisible && (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12">
@@ -119,7 +104,6 @@ const Landing = () => {
                 <p className="text-xl text-gray-700 font-poppins leading-relaxed mb-8 max-w-lg">
                   Wellness Buddy helps individuals prioritize well-being with daily tracking, smart reminders, and mental health support, fostering balance in life.
                 </p>
-                
                 <motion.div 
                   className="flex flex-wrap gap-4"
                   initial={{ opacity: 0 }}
@@ -144,7 +128,6 @@ const Landing = () => {
                   </motion.a>
                 </motion.div>
               </motion.div>
-              
               <motion.div
                 className="lg:w-1/2 relative"
                 style={{ y: heroImageY }}
@@ -212,7 +195,6 @@ const Landing = () => {
           >
             Everything you need to maintain balance and wellness in your daily life
           </motion.p>
-          
           <motion.div 
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             variants={containerVariants}
@@ -307,7 +289,6 @@ const Landing = () => {
                 {/* Other social icons */}
               </div>
             </div>
-            
             <div>
               <h4 className="text-lg font-semibold mb-6 text-white">Features</h4>
               <ul className="space-y-3">
@@ -317,7 +298,6 @@ const Landing = () => {
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors duration-200">Work-life Balance</a></li>
               </ul>
             </div>
-            
             <div>
               <h4 className="text-lg font-semibold mb-6 text-white">Company</h4>
               <ul className="space-y-3">
@@ -328,7 +308,6 @@ const Landing = () => {
               </ul>
             </div>
           </div>
-          
           <div className="border-t border-gray-800 pt-8">
             <p className="text-center text-gray-500 text-sm">© 2025 Wellness Buddy | All Rights Reserved</p>
           </div>
