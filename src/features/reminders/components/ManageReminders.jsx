@@ -4,7 +4,7 @@ import {
   addReminder,
   updateReminder,
   deleteReminder,
-} from "../services/reminderService";
+} from "../../../services/reminderService";
 
 const REMINDER_TYPES = [
   { value: "water", label: "💧 Water" },

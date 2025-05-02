@@ -5,10 +5,10 @@ import { fetchDashboardData } from "../services/dashboardService";
 
 // Lazy load widgets for performance
 const CalendarWidget = lazy(() => import("../components/CalendarWidget"));
-const MoodTracker = lazy(() => import("../components/MoodTracker"));
-const SleepTracker = lazy(() => import("../components/SleepTracker"));
-const HydrationTracker = lazy(() => import("../components/HydrationTracker"));
-const WorkTracker = lazy(() => import("../components/WorkTracker"));
+const MoodTracker = lazy(() => import("../features/wellness/components/MoodTracker"));
+const SleepTracker = lazy(() => import("../features/wellness/components/SleepTracker"));
+const HydrationTracker = lazy(() => import("../features/wellness/components/HydrationTracker"));
+const WorkTracker = lazy(() => import("../features/wellness/components/WorkTracker"));
 
 // Skeleton loader for suspense fallback
 const SkeletonLoader = () => (
