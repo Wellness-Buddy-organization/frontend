@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { fetchDashboardData } from "../services/dashboardService";
 
 // Lazy load widgets for performance
 const CalendarWidget = lazy(() => import("../components/CalendarWidget"));
@@ -37,40 +37,31 @@ const Dashboard = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const fetchDashboardData = async () => {
+    const getData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/unauthorized");
-          return;
-        }
-        const response = await axios.get(
-          import.meta.env.VITE_API_URL+"/dashboard/me",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: controller.signal,
-          }
-        );
-        setUserName(response.data.user.fullName);
-        setWellnessData(response.data.wellness);
+        const data = await fetchDashboardData(controller.signal);
+        setUserName(data.user.fullName);
+        setWellnessData(data.wellness);
         setIsLoading(false);
       } catch (err) {
-        if (axios.isCancel(err)) return;
-        // Handle 401 Unauthorized or session timeout (e.g., 419/440)
-        if (err.response?.status === 401) {
+        if (err.message === "Unauthorized") {
           navigate("/unauthorized");
         } else if (
           err.response?.status === 419 ||
           err.response?.status === 440
         ) {
           navigate("/timeout");
+        } else if (err.response?.status === 401) {
+          navigate("/unauthorized");
+        } else if (err.message === "canceled") {
+          return;
         } else {
           setError(err.message || "Failed to load dashboard data");
           setIsLoading(false);
         }
       }
     };
-    fetchDashboardData();
+    getData();
     return () => controller.abort();
   }, [navigate]);
 
