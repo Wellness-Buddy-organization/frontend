@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { signupUser, signupWithGoogle } from '../services/authService';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -33,12 +33,12 @@ const Signup = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(import.meta.env.VITE_API_URL+'/users/signup', formData);
+      const response = await signupUser(formData);
       setIsSubmitting(false);
       setIsSubmitted(true);
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('token', response.token);
       setTimeout(() => {
-        navigate('/dashboard'); // Redirect to dashboard
+        navigate('/dashboard');
       }, 1500);
     } catch (error) {
       setIsSubmitting(false);
@@ -65,14 +65,8 @@ const Signup = () => {
     setErrors({ ...errors, [name]: '' });
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = import.meta.env.VITE_API_URL+'/auth/google';
-  };
-
   return (
-    <div
-      className="min-h-screen font-poppins flex flex-col lg:flex-row overflow-x-hidden relative"
-    >
+    <div className="min-h-screen font-poppins flex flex-col lg:flex-row overflow-x-hidden relative">
       {/* Left Panel */}
       <motion.div
         className="lg:w-1/2 w-full h-64 lg:h-screen flex items-center justify-center relative overflow-hidden"
@@ -149,7 +143,6 @@ const Signup = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
               )}
             </div>
-
             {/* Email */}
             <div className="relative">
               <div className="relative">
@@ -170,7 +163,6 @@ const Signup = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
-
             {/* Password */}
             <div className="relative">
               <div className="relative">
@@ -202,7 +194,6 @@ const Signup = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
-
             {/* Create Account Button */}
             <motion.button
               type="submit"
@@ -242,17 +233,15 @@ const Signup = () => {
                 : 'Create Account'}
             </motion.button>
           </form>
-
           {/* Divider */}
           <div className="flex items-center my-6">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500">or</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
-
           {/* Google Sign-Up Button */}
           <motion.button
-            onClick={handleGoogleSignIn}
+            onClick={signupWithGoogle}
             className="w-full bg-white bg-opacity-20 backdrop-blur-md border border-white border-opacity-20 text-gray-900 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-custom-green-100 transition-all duration-300"
             whileHover={{ scale: 1.05, translateY: -2 }}
             whileTap={{ scale: 0.95 }}
