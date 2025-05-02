@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { loginUser, loginWithGoogle } from '../services/authService';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -31,14 +31,12 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(import.meta.env.VITE_API_URL+'/users/login', {
+      const data = await loginUser({
         email: formData.email,
         password: formData.password,
       });
       setIsSubmitting(false);
-      // Store token in localStorage
-      localStorage.setItem('token', response.data.token);
-      // Redirect to dashboard
+      localStorage.setItem('token', data.token);
       navigate('/dashboard');
     } catch (error) {
       setIsSubmitting(false);
@@ -66,10 +64,6 @@ const Login = () => {
       [name]: type === 'checkbox' ? checked : value,
     });
     setErrors({ ...errors, [name]: '' });
-  };
-
-  const handleGoogleSignIn = () => {
-    window.location.href = import.meta.env.VITE_API_URL+'/auth/google';
   };
 
   return (
@@ -107,7 +101,6 @@ const Login = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
             </div>
-
             {/* Password */}
             <div className="relative">
               <div className="relative">
@@ -136,7 +129,6 @@ const Login = () => {
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
             </div>
-
             {/* Remember Me and Forgot Password */}
             <div className="flex justify-between items-center text-sm">
               <label className="flex items-center space-x-2">
@@ -153,7 +145,6 @@ const Login = () => {
                 Forgot Password?
               </a>
             </div>
-
             {/* Sign In Button */}
             <motion.button
               type="submit"
@@ -187,17 +178,15 @@ const Login = () => {
               {isSubmitting ? 'Signing In...' : 'Sign In'}
             </motion.button>
           </form>
-
           {/* Divider */}
           <div className="flex items-center my-6">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500">or</span>
             <div className="flex-grow border-t border-gray-300"></div>
           </div>
-
           {/* Google Sign-In Button */}
           <motion.button
-            onClick={handleGoogleSignIn}
+            onClick={loginWithGoogle}
             className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -222,7 +211,6 @@ const Login = () => {
             </svg>
             Sign In with Google
           </motion.button>
-
           {/* Sign Up Link */}
           <p className="text-center mt-6 text-gray-600">
             Don’t have an account?{' '}
@@ -232,7 +220,6 @@ const Login = () => {
           </p>
         </div>
       </motion.div>
-
       {/* Right Panel - Image and Text */}
       <motion.div
         className="lg:w-1/2 w-full h-64 lg:h-screen flex items-center justify-center relative overflow-hidden"
