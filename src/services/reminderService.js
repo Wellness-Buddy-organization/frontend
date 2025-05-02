@@ -10,6 +10,11 @@ const getAuthHeaders = () => {
   };
 };
 
+export const fetchReminders = async () => {
+  const { data } = await api.get("/reminder");
+  return data;
+};
+
 export const addReminder = async (data) => {
   const res = await axios.post(`${API_URL}/reminder`, data, {
     headers: getAuthHeaders(),

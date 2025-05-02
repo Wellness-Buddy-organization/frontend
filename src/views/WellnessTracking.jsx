@@ -1,8 +1,21 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import {
+  fetchDashboard,
+  fetchReminders,
+  fetchBreaks,
+  saveMood,
+  saveSleep,
+  saveWork,
+  logBreak,
+} from "../services/wellnessService";
+import {
+  addReminder,
+  updateReminder,
+  deleteReminder,
+} from "../services/reminderService";
 
-// KPI Dashboard: mood, stress, sleep, work, hydration, breaks, reminders
+// Mood value mapping
 const moodMap = [
   { value: 1, label: "angry", emoji: "😠" },
   { value: 2, label: "sad", emoji: "😢" },
@@ -57,23 +70,15 @@ function DraggableModal({ open, onClose, children, ariaLabel }) {
 function ManageRemindersModal({ open, onClose, reminders, setReminders }) {
   const [form, setForm] = useState({ type: "water", time: "", enabled: true });
   const [editingId, setEditingId] = useState(null);
-  const token = localStorage.getItem("token");
-  const api = axios.create({
-    baseURL: "/api",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      const res = await api.put(`/reminder/${editingId}`, form);
-      setReminders(reminders.map((r) => (r._id === editingId ? res.data : r)));
+      const updated = await updateReminder(editingId, form);
+      setReminders(reminders.map((r) => (r._id === editingId ? updated : r)));
     } else {
-      const res = await api.post("/reminder", form);
-      setReminders([...reminders, res.data]);
+      const added = await addReminder(form);
+      setReminders([...reminders, added]);
     }
     setForm({ type: "water", time: "", enabled: true });
     setEditingId(null);
@@ -89,7 +94,7 @@ function ManageRemindersModal({ open, onClose, reminders, setReminders }) {
   };
 
   const handleDelete = async (id) => {
-    await api.delete(`/reminder/${id}`);
+    await deleteReminder(id);
     setReminders(reminders.filter((r) => r._id !== id));
     if (editingId === id) setEditingId(null);
   };
@@ -282,7 +287,7 @@ function BreathingModal({ open, onClose }) {
               </div>
             </motion.div>
             <button
-              className="bg-emerald-500 text-white px-4 py-2 rounded shadow"
+              className="bg-emerald-500 text-white px-4 py-2 rounded"
               onClick={() => setStep((step + 1) % steps.length)}
             >
               Next
@@ -313,16 +318,6 @@ const WellnessTracking = () => {
   const [breathOpen, setBreathOpen] = useState(false);
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
 
-  // Axios instance with auth
-  const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  // Real-time data update pattern (interval polling, ready for live data)[2]
   useEffect(() => {
     let interval;
     const fetchData = async () => {
@@ -330,30 +325,70 @@ const WellnessTracking = () => {
       setError("");
       try {
         const [dashboardRes, remindersRes, breaksRes] = await Promise.all([
-          api.get("/dashboard/me"),
-          api.get("/reminder"),
-          api.get("/break"),
+          fetchDashboard(),
+          fetchReminders(),
+          fetchBreaks(),
         ]);
-        setDashboard(dashboardRes.data?.wellness);
-        setReminders(remindersRes.data);
-        setBreaks(breaksRes.data);
+        setDashboard(dashboardRes?.wellness);
+        setReminders(remindersRes);
+        setBreaks(breaksRes);
       } catch (err) {
         if (err.response?.status === 401)
           setError("Unauthorized. Please log in.");
-        else if (err.response?.status === 404) setError("Some data not found.");
+        else if (err.response?.status === 404)
+          setError("Some data not found.");
         else setError("Failed to load data.");
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-    // Example: update every 2 minutes for near real-time dashboard[2]
     interval = setInterval(fetchData, 120000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line
   }, []);
 
-  // --- KPI Dashboard UI ---
+  const handleSaveMood = async () => {
+    setError("");
+    setSuccess("");
+    try {
+      const moodObj = moodMap.find((m) => m.value === Number(moodValue));
+      await saveMood(moodObj.label, stressValue);
+      setSuccess("Mood saved!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch {
+      setError("Failed to save mood.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  const handleSaveSleepWork = async () => {
+    setError("");
+    setSuccess("");
+    try {
+      if (sleepHours) await saveSleep(sleepHours);
+      if (workHours) await saveWork(workHours);
+      setSuccess("Sleep/work hours saved!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch {
+      setError("Failed to save sleep or work hours.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  const handleLogBreak = async () => {
+    setError("");
+    setSuccess("");
+    try {
+      const newBreak = await logBreak();
+      setBreaks((prev) => [newBreak, ...prev]);
+      setSuccess("Break logged!");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch {
+      setError("Failed to log break.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -427,24 +462,7 @@ const WellnessTracking = () => {
           </div>
           <button
             className="bg-emerald-500 text-white px-4 py-2 rounded"
-            onClick={async () => {
-              setError("");
-              setSuccess("");
-              try {
-                const moodObj = moodMap.find(
-                  (m) => m.value === Number(moodValue)
-                );
-                await api.post("/mood", {
-                  mood: moodObj.label,
-                  notes: `Stress: ${stressValue}`,
-                });
-                setSuccess("Mood saved!");
-                setTimeout(() => setSuccess(""), 2000);
-              } catch {
-                setError("Failed to save mood.");
-                setTimeout(() => setError(""), 3000);
-              }
-            }}
+            onClick={handleSaveMood}
           >
             Save Mood
           </button>
@@ -481,28 +499,7 @@ const WellnessTracking = () => {
           </div>
           <button
             className="bg-emerald-500 text-white px-4 py-2 rounded"
-            onClick={async () => {
-              setError("");
-              setSuccess("");
-              try {
-                if (sleepHours) {
-                  await api.post("/sleep", {
-                    hours: sleepHours,
-                    quality: "good",
-                  });
-                }
-                if (workHours) {
-                  await api.post("/work", {
-                    hours: workHours,
-                  });
-                }
-                setSuccess("Sleep/work hours saved!");
-                setTimeout(() => setSuccess(""), 2000);
-              } catch {
-                setError("Failed to save sleep or work hours.");
-                setTimeout(() => setError(""), 3000);
-              }
-            }}
+            onClick={handleSaveSleepWork}
           >
             Save Sleep & Work
           </button>
@@ -518,22 +515,7 @@ const WellnessTracking = () => {
           </p>
           <button
             className="bg-emerald-500 text-white px-4 py-2 rounded"
-            onClick={async () => {
-              setError("");
-              setSuccess("");
-              try {
-                const res = await api.post("/break", {
-                  duration: 5,
-                  type: "short",
-                });
-                setBreaks((prev) => [res.data, ...prev]);
-                setSuccess("Break logged!");
-                setTimeout(() => setSuccess(""), 2000);
-              } catch {
-                setError("Failed to log break.");
-                setTimeout(() => setError(""), 3000);
-              }
-            }}
+            onClick={handleLogBreak}
           >
             Log Break
           </button>
