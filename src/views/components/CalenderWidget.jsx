@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
+/**
+ * Calendar widget component for displaying upcoming events and activities
+ * 
+ * @returns {JSX.Element} CalendarWidget component
+ */
 const CalendarWidget = () => {
   const [currentWeek, setCurrentWeek] = useState({
     start: 24,
@@ -12,6 +17,7 @@ const CalendarWidget = () => {
   
   const [selectedDay, setSelectedDay] = useState(26);
   
+  // Days of the current week
   const days = [
     { day: 'Wed', date: 24 },
     { day: 'Thu', date: 25 },
@@ -20,6 +26,9 @@ const CalendarWidget = () => {
     { day: 'Sun', date: 28 }
   ];
 
+  /**
+   * Handle navigation to previous week
+   */
   const handlePrevWeek = () => {
     setCurrentWeek(prev => ({
       ...prev,
@@ -28,6 +37,9 @@ const CalendarWidget = () => {
     }));
   };
 
+  /**
+   * Handle navigation to next week
+   */
   const handleNextWeek = () => {
     setCurrentWeek(prev => ({
       ...prev,
@@ -41,6 +53,9 @@ const CalendarWidget = () => {
       className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl border border-emerald-100 shadow-lg p-6 h-full"
       whileHover={{ boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)' }}
       transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
     >
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Calendar</h2>
       
@@ -51,6 +66,7 @@ const CalendarWidget = () => {
           <button 
             onClick={handlePrevWeek}
             className="p-1 rounded-full hover:bg-gray-100"
+            aria-label="Previous week"
           >
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
@@ -62,12 +78,14 @@ const CalendarWidget = () => {
           <button 
             onClick={handleNextWeek}
             className="p-1 rounded-full hover:bg-gray-100"
+            aria-label="Next week"
           >
             <ChevronRightIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
       
+      {/* Days of week navigation */}
       <div className="grid grid-cols-5 gap-2">
         {days.map((day) => (
           <motion.button
@@ -93,6 +111,7 @@ const CalendarWidget = () => {
         ))}
       </div>
       
+      {/* Events list */}
       <div className="mt-6 space-y-3">
         <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
           <div className="flex items-center">

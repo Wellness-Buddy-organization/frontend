@@ -1,25 +1,94 @@
-import axios from "axios";
+import apiService from './ApiService';
+import { User } from '../models';
 
-export const loginUser = async ({ email, password }) => {
-  const response = await axios.post(
-    import.meta.env.VITE_API_URL + "/users/login",
-    { email, password }
-  );
-  return response.data;
-};
+/**
+ * Service for handling authentication-related API calls
+ */
+class AuthService {
+  /**
+   * Log in a user
+   * @param {Object} credentials - User credentials (email, password)
+   * @returns {Promise<User>} User object with token
+   */
+  async login(credentials) {
+    try {
+      const response = await apiService.post('/users/login', credentials);
+      
+      // Store token in localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      
+      // Create and return user model
+      const user = User.fromApiResponse(response.data.user || {});
+      user.token = response.data.token;
+      
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-export const signupUser = async (formData) => {
-  const response = await axios.post(
-    import.meta.env.VITE_API_URL + "/users/signup",
-    formData
-  );
-  return response.data;
-};
+  /**
+   * Register a new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise<User>} User object with token
+   */
+  async signup(userData) {
+    try {
+      const response = await apiService.post('/users/signup', userData);
+      
+      // Store token in localStorage
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      
+      // Create and return user model
+      const user = User.fromApiResponse(response.data.user || {});
+      user.token = response.data.token;
+      
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 
-export const signupWithGoogle = () => {
-  window.location.href = import.meta.env.VITE_API_URL + "/auth/google";
-};
+  /**
+   * Log out the current user
+   * @returns {Promise<void>}
+   */
+  async logout() {
+    try {
+      // Call logout endpoint if exists
+      // await apiService.post('/users/logout');
+      
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+    } catch (error) {
+      // Still remove token even if API call fails
+      localStorage.removeItem('token');
+      throw error;
+    }
+  }
 
-export const loginWithGoogle = () => {
-  window.location.href = import.meta.env.VITE_API_URL + "/auth/google";
-};
+  /**
+   * Check if user is authenticated
+   * @returns {boolean} Authentication status
+   */
+  isAuthenticated() {
+    return !!localStorage.getItem('token');
+  }
+
+  /**
+   * Initiate Google OAuth flow
+   * @param {string} type - 'login' or 'signup'
+   */
+  googleAuth(type = 'login') {
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google${type === 'signup' ? '?signup=true' : ''}`;
+  }
+}
+
+// Create singleton instance
+const authService = new AuthService();
+
+export default authService;

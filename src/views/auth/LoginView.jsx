@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
-import { loginUser, loginWithGoogle } from '../services/authService';
+import { authController } from '../../controllers';
 
-const Login = () => {
+/**
+ * Login view component
+ */
+const LoginView = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,6 +18,23 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  /**
+   * Handle form input changes
+   * @param {Event} e - Form event
+   */
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
+    setErrors({ ...errors, [name]: '', general: '' });
+  };
+
+  /**
+   * Validate form inputs
+   * @returns {boolean} Is form valid
+   */
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -25,45 +45,50 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handle form submission
+   * @param {Event} e - Form event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
 
     try {
-      const data = await loginUser({
-        email: formData.email,
-        password: formData.password,
-      });
-      setIsSubmitting(false);
-      localStorage.setItem('token', data.token);
-      navigate('/dashboard');
-    } catch (error) {
-      setIsSubmitting(false);
-      if (error.response) {
-        const { message, errors: apiErrors } = error.response.data;
-        if (apiErrors) {
-          const errorMap = {};
-          apiErrors.forEach((err) => {
-            errorMap[err.param] = err.msg;
-          });
-          setErrors(errorMap);
-        } else if (message) {
-          setErrors({ general: message });
+      await authController.login(
+        {
+          email: formData.email,
+          password: formData.password,
+        },
+        // Success callback
+        () => {
+          navigate('/dashboard');
+        },
+        // Error callback
+        (message, apiErrors) => {
+          if (apiErrors) {
+            const errorMap = {};
+            apiErrors.forEach((err) => {
+              errorMap[err.param] = err.msg;
+            });
+            setErrors(errorMap);
+          } else {
+            setErrors({ general: message });
+          }
         }
-      } else {
-        setErrors({ general: 'An error occurred. Please try again.' });
-      }
+      );
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
-    setErrors({ ...errors, [name]: '' });
+  /**
+   * Handle Google login
+   */
+  const handleGoogleLogin = () => {
+    authController.googleAuth('login');
   };
 
   return (
@@ -186,7 +211,7 @@ const Login = () => {
           </div>
           {/* Google Sign-In Button */}
           <motion.button
-            onClick={loginWithGoogle}
+            onClick={handleGoogleLogin}
             className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -213,10 +238,10 @@ const Login = () => {
           </motion.button>
           {/* Sign Up Link */}
           <p className="text-center mt-6 text-gray-600">
-            Don’t have an account?{' '}
-            <a href="/signup" className="text-custom-green-600 hover:underline">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-custom-green-600 hover:underline">
               Create
-            </a>
+            </Link>
           </p>
         </div>
       </motion.div>
@@ -224,7 +249,7 @@ const Login = () => {
       <motion.div
         className="lg:w-1/2 w-full h-64 lg:h-screen flex items-center justify-center relative overflow-hidden"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1497366754035-f200ff6aa01f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1497366754035-f200fff6a01f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -250,18 +275,18 @@ const Login = () => {
           >
             Enter your personal details and start your journey with us.
           </motion.p>
-          <motion.a
-            href="/signup"
+          <motion.Link
+            to="/signup"
             className="inline-block bg-custom-green-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-custom-green-800 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign Up
-          </motion.a>
+          </motion.Link>
         </div>
       </motion.div>
     </div>
   );
 };
 
-export default Login;
+export default LoginView;

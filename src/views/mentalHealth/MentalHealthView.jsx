@@ -827,7 +827,7 @@ function CrisisModal({ open, onClose }) {
 }
 
 // Main Mental Health Component
-const MentalHealth = () => {
+const MentalHealthView = () => {
   const [currentQuote, setCurrentQuote] = useState(quotes[Math.floor(Math.random() * quotes.length)]);
   const [mood, setMood] = useState(4); // Default: Neutral
   const [medOpen, setMedOpen] = useState(false);
@@ -962,4 +962,4 @@ const MentalHealth = () => {
   );
 };
 
-export default MentalHealth;
+export default MentalHealthView;

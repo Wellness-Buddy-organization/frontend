@@ -1,17 +1,18 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { fetchDashboardData } from "../services/dashboardService";
-import { ChartBarIcon, HeartIcon, BriefcaseIcon,  } from "@heroicons/react/24/outline";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChartBarIcon, HeartIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import { dashboardController } from "../../controllers";
+import WellnessCard from "../components/WellnessCard";
 
 // Lazy load components for performance
-const MoodTracker = lazy(() => import("../features/wellness/components/MoodTracker"));
-const SleepTracker = lazy(() => import("../features/wellness/components/SleepTracker"));
-const HydrationTracker = lazy(() => import("../features/wellness/components/HydrationTracker"));
-const WorkTracker = lazy(() => import("../features/wellness/components/WorkTracker"));
-const CalendarWidget = lazy(() => import("../components/CalendarWidget"));
+const MoodTracker = lazy(() => import("./MoodTracker"));
+const SleepTracker = lazy(() => import("./SleepTracker"));
+const HydrationTracker = lazy(() => import("./HydrationTracker"));
+const WorkTracker = lazy(() => import("./WorkTracker"));
+const CalendarWidget = lazy(() => import("../components/CalenderWidget"));
 
-// Skeleton component for suspense fallback
+// Skeleton loader for Suspense fallback
 const SkeletonLoader = ({ height = "h-64" }) => (
   <motion.div
     initial={{ opacity: 0 }}
@@ -24,63 +25,35 @@ const SkeletonLoader = ({ height = "h-64" }) => (
   </motion.div>
 );
 
+// Notification component for feedback
+const Notification = ({ message, type, onClose }) => {
+  if (!message) return null;
+  
+  const bgColor = type === "success" 
+    ? "bg-green-50 text-green-800 border-green-200" 
+    : type === "error" 
+    ? "bg-red-50 text-red-800 border-red-200"
+    : "bg-blue-50 text-blue-800 border-blue-200";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={`flex items-center p-4 mb-4 text-sm rounded-lg ${bgColor} border shadow-sm`}
+      role="alert"
+    >
+      <span className="font-medium mr-2">{type === "success" ? "Success!" : type === "error" ? "Error!" : "Info"}</span>
+      <span className="flex-1">{message}</span>
+      <button onClick={onClose} className="ml-4 text-lg font-bold leading-none hover:text-gray-500">
+        &times;
+      </button>
+    </motion.div>
+  );
+};
+
 // Wellness Score Component
-const WellnessScore = ({ dashboard }) => {
-  // Calculate overall wellness score (0-100) based on all metrics
-  const calculateScore = () => {
-    if (!dashboard) return 0;
-    
-    let score = 0;
-    let factors = 0;
-    
-    // Add mood score (1-5 scale to 0-20 scale)
-    if (dashboard.mood && dashboard.mood.length > 0) {
-      const recentMood = dashboard.mood[0];
-      // Convert mood string to number value
-      const moodMap = { happy: 5, neutral: 4, anxious: 3, sad: 2, angry: 1 };
-      const moodValue = moodMap[recentMood.mood] || 3;
-      score += moodValue * 4; // Scale to 0-20
-      factors++;
-    }
-    
-    // Add sleep score (compare to ideal 7-9 hours)
-    if (dashboard.sleep && dashboard.sleep.length > 0) {
-      const recentSleep = dashboard.sleep[0];
-      // 8 hours is optimal (20 points), less than 6 or more than 10 is poor (5 points)
-      const sleepScore = recentSleep.hours >= 7 && recentSleep.hours <= 9 
-        ? 20 
-        : (recentSleep.hours >= 6 && recentSleep.hours <= 10 ? 15 : 5);
-      score += sleepScore;
-      factors++;
-    }
-    
-    // Add hydration score (ideal is 2-3L)
-    if (dashboard.hydration && dashboard.hydration.length > 0) {
-      const recentHydration = dashboard.hydration[0];
-      // Convert glasses to liters (1 glass = 0.25L)
-      const liters = recentHydration.glasses * 0.25;
-      const hydrationScore = liters >= 2 ? 20 : (liters >= 1 ? 15 : 5);
-      score += hydrationScore;
-      factors++;
-    }
-    
-    // Add work balance score (ideal is 7-8 hours)
-    if (dashboard.work && dashboard.work.length > 0) {
-      const recentWork = dashboard.work[0];
-      // Work balance: 7-8 hours is optimal, >10 or <4 is poor
-      const workScore = (recentWork.hours >= 7 && recentWork.hours <= 8) 
-        ? 20 
-        : (recentWork.hours > 10 || recentWork.hours < 4) ? 5 : 15;
-      score += workScore;
-      factors++;
-    }
-    
-    // Calculate average and round to nearest whole number
-    return Math.round(factors > 0 ? score / factors : 0);
-  };
-  
-  const score = calculateScore();
-  
+const WellnessScore = ({ score, wellnessData }) => {
   // Color based on score
   const getScoreColor = () => {
     if (score >= 80) return "text-emerald-500";
@@ -90,13 +63,10 @@ const WellnessScore = ({ dashboard }) => {
   };
   
   return (
-    <motion.div
-      className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-6 h-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)" }}
+    <WellnessCard 
+      title="Wellness Score" 
+      tooltip="Your overall wellness score based on sleep, mood, hydration, and work balance."
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Wellness Score</h2>
       <div className="flex flex-col items-center">
         <div className={`text-5xl font-bold ${getScoreColor()}`}>
           {score}
@@ -117,21 +87,21 @@ const WellnessScore = ({ dashboard }) => {
           <span>Excellent</span>
         </div>
       </div>
-    </motion.div>
+    </WellnessCard>
   );
 };
 
 // Personalized Insights Component
-const InsightsPanel = ({ dashboard }) => {
+const InsightsPanel = ({ wellnessData }) => {
+  // Generate insights based on data patterns
   const getInsight = () => {
-    if (!dashboard) return { title: "Loading insights...", description: "" };
+    if (!wellnessData) return { title: "Loading insights...", description: "" };
     
-    // Generate insights based on data patterns
     const insights = [];
     
     // Sleep patterns
-    if (dashboard.sleep && dashboard.sleep.length > 1) {
-      const avgSleep = dashboard.sleep.reduce((sum, entry) => sum + entry.hours, 0) / dashboard.sleep.length;
+    if (wellnessData.sleep && wellnessData.sleep.length > 1) {
+      const avgSleep = wellnessData.getAverageSleep();
       if (avgSleep < 7) {
         insights.push({
           title: "Sleep Focus",
@@ -143,21 +113,23 @@ const InsightsPanel = ({ dashboard }) => {
     }
     
     // Hydration patterns
-    if (dashboard.hydration && dashboard.hydration.length > 0) {
-      const recentHydration = dashboard.hydration[0].glasses * 0.25; // Convert to liters
-      if (recentHydration < 2) {
+    if (wellnessData.hydration && wellnessData.hydration.length > 0) {
+      const avgHydration = wellnessData.getAverageHydration() * 0.25; // Convert to liters
+      if (avgHydration < 2) {
         insights.push({
           title: "Hydration Alert",
           description: "Your recent water intake is below the recommended 2 liters. Set reminders to drink more water.",
-          icon: <DropletIcon className="w-6 h-6 text-blue-500" />,
+          icon: <svg className="w-6 h-6 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.172a2 2 0 00-1.022.547m5.422-2.998a6 6 0 00-3.86-.517l-1.22.243M14 12h2M15 8a7.002 7.002 0 00-5-5M15 16a7.002 7.002 0 01-5 5" />
+          </svg>,
           priority: 2
         });
       }
     }
     
     // Work-life balance
-    if (dashboard.work && dashboard.work.length > 1) {
-      const avgWork = dashboard.work.reduce((sum, entry) => sum + entry.hours, 0) / dashboard.work.length;
+    if (wellnessData.work && wellnessData.work.length > 1) {
+      const avgWork = wellnessData.getAverageWorkHours();
       if (avgWork > 9) {
         insights.push({
           title: "Work-Life Balance",
@@ -169,10 +141,8 @@ const InsightsPanel = ({ dashboard }) => {
     }
     
     // Mood patterns
-    if (dashboard.mood && dashboard.mood.length > 1) {
-      const moodMap = { happy: 5, neutral: 4, anxious: 3, sad: 2, angry: 1 };
-      const recentMoods = dashboard.mood.slice(0, 3);
-      const avgMood = recentMoods.reduce((sum, entry) => sum + (moodMap[entry.mood] || 3), 0) / recentMoods.length;
+    if (wellnessData.mood && wellnessData.mood.length > 1) {
+      const avgMood = wellnessData.getAverageMood();
       
       if (avgMood <= 3) {
         insights.push({
@@ -199,13 +169,7 @@ const InsightsPanel = ({ dashboard }) => {
   const insight = getInsight();
   
   return (
-    <motion.div
-      className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-6 h-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)" }}
-    >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Today's Focus</h2>
+    <WellnessCard title="Today's Focus">
       <div className="flex items-start gap-4">
         <div className="rounded-full bg-emerald-100 p-3">
           {insight.icon || <HeartIcon className="w-6 h-6 text-emerald-500" />}
@@ -215,52 +179,56 @@ const InsightsPanel = ({ dashboard }) => {
           <p className="text-gray-600">{insight.description}</p>
         </div>
       </div>
-    </motion.div>
+    </WellnessCard>
   );
 };
 
-const Dashboard = () => {
+/**
+ * Main Dashboard View component
+ */
+const DashboardView = () => {
   const [userName, setUserName] = useState("");
-  const [wellnessData, setWellnessData] = useState({
-    mood: [],
-    sleep: [],
-    hydration: [],
-    work: [],
-  });
+  const [wellnessData, setWellnessData] = useState(null);
+  const [wellnessScore, setWellnessScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview"); // For mobile tab navigation
+  const [activeTab, setActiveTab] = useState("overview"); // For mobile navigation
   const navigate = useNavigate();
 
+  // Fetch dashboard data on component mount
   useEffect(() => {
+    // Create abort controller for cleanup
     const controller = new AbortController();
-    const getData = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchDashboardData(controller.signal);
-        setUserName(data.user.fullName);
-        setWellnessData(data.wellness);
+    
+    // Fetch dashboard data
+    dashboardController.fetchDashboardData(
+      controller.signal,
+      // Success callback
+      (data) => {
+        // Process data for UI
+        const processedData = dashboardController.processDashboardData(data);
+        setUserName(processedData.userName);
+        setWellnessData(data.wellness); // Using the model instance
+        setWellnessScore(processedData.wellnessScore);
         setError(null);
-      } catch (err) {
-        if (err.message === "Unauthorized") {
+      },
+      // Error callback
+      (message, errorType) => {
+        if (errorType === 'auth') {
           navigate("/unauthorized");
-        } else if (
-          err.response?.status === 419 ||
-          err.response?.status === 440
-        ) {
+        } else if (errorType === 'timeout') {
           navigate("/timeout");
-        } else if (err.response?.status === 401) {
-          navigate("/unauthorized");
-        } else if (err.message === "canceled") {
-          return;
         } else {
-          setError(err.message || "Failed to load dashboard data");
+          setError(message || "Failed to load dashboard data");
         }
-      } finally {
+      },
+      // Finally callback
+      () => {
         setIsLoading(false);
       }
-    };
-    getData();
+    );
+    
+    // Cleanup on unmount
     return () => controller.abort();
   }, [navigate]);
 
@@ -273,6 +241,7 @@ const Dashboard = () => {
     { id: "work", label: "Work" },
   ];
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto">
@@ -286,6 +255,7 @@ const Dashboard = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <motion.div
@@ -348,8 +318,8 @@ const Dashboard = () => {
         <>
           {/* Top Row: Wellness Score and Insights Panel */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <WellnessScore dashboard={wellnessData} />
-            <InsightsPanel dashboard={wellnessData} />
+            <WellnessScore score={wellnessScore} wellnessData={wellnessData} />
+            <InsightsPanel wellnessData={wellnessData} />
           </div>
         </>
       )}
@@ -360,25 +330,25 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {(activeTab === "overview" || activeTab === "mood" || window.innerWidth >= 768) && (
               <Suspense fallback={<SkeletonLoader />}>
-                <MoodTracker data={wellnessData.mood} />
+                <MoodTracker data={wellnessData?.mood || []} />
               </Suspense>
             )}
             
             {(activeTab === "overview" || activeTab === "sleep" || window.innerWidth >= 768) && (
               <Suspense fallback={<SkeletonLoader />}>
-                <SleepTracker data={wellnessData.sleep} />
+                <SleepTracker data={wellnessData?.sleep || []} />
               </Suspense>
             )}
             
             {(activeTab === "overview" || activeTab === "hydration" || window.innerWidth >= 768) && (
               <Suspense fallback={<SkeletonLoader />}>
-                <HydrationTracker data={wellnessData.hydration} />
+                <HydrationTracker data={wellnessData?.hydration || []} />
               </Suspense>
             )}
             
             {(activeTab === "overview" || activeTab === "work" || window.innerWidth >= 768) && (
               <Suspense fallback={<SkeletonLoader />}>
-                <WorkTracker data={wellnessData.work} />
+                <WorkTracker data={wellnessData?.work || []} />
               </Suspense>
             )}
           </div>
@@ -394,4 +364,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardView;

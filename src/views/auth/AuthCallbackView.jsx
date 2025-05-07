@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AuthCallback = () => {
+const AuthCallbackView = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,4 +31,4 @@ const AuthCallback = () => {
   );
 };
 
-export default AuthCallback;
+export default AuthCallbackView;

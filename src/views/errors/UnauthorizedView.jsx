@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const Unauthorized = () => (
+const UnauthorizedView = () => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -23,4 +23,4 @@ const Unauthorized = () => (
   </motion.div>
 );
 
-export default Unauthorized;
+export default UnauthorizedView;

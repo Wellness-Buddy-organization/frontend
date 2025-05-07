@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
-const Timeout = () => (
+const TimeoutView = () => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -23,4 +23,4 @@ const Timeout = () => (
   </motion.div>
 );
 
-export default Timeout;
+export default TimeoutView;

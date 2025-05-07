@@ -733,7 +733,7 @@ const BalanceTips = () => {
 };
 
 // Main Work-Life Balance Component
-const WorkLifeBalance = () => {
+const WorkLifeBalanceView = () => {
   const [mockData, setMockData] = useState({
     balanceScore: 72,
     timeAllocation: [
@@ -821,4 +821,4 @@ const WorkLifeBalance = () => {
   );
 };
 
-export default WorkLifeBalance;
+export default WorkLifeBalanceView;

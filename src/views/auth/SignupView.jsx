@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeSlashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
-import { signupUser, signupWithGoogle } from '../services/authService';
+import { authController } from '../../controllers';
 
-const Signup = () => {
+/**
+ * SignupView component for user registration
+ */
+const SignupView = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -16,6 +19,10 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+  /**
+   * Validate form inputs
+   * @returns {boolean} Is form valid
+   */
   const validateForm = () => {
     const newErrors = {};
     if (!formData.fullName) newErrors.fullName = 'Full Name is required';
@@ -27,42 +34,61 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Handle form submission
+   * @param {Event} e - Form event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
 
     try {
-      const response = await signupUser(formData);
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      localStorage.setItem('token', response.token);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    } catch (error) {
-      setIsSubmitting(false);
-      if (error.response) {
-        const { message, errors: apiErrors } = error.response.data;
-        if (apiErrors) {
-          const errorMap = {};
-          apiErrors.forEach((err) => {
-            errorMap[err.param] = err.msg;
-          });
-          setErrors(errorMap);
-        } else if (message) {
-          setErrors({ general: message });
+      await authController.signup(
+        formData,
+        // Success callback
+        (user) => {
+          setIsSubmitting(false);
+          setIsSubmitted(true);
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 1500);
+        },
+        // Error callback
+        (message, apiErrors) => {
+          if (apiErrors) {
+            const errorMap = {};
+            apiErrors.forEach((err) => {
+              errorMap[err.param] = err.msg;
+            });
+            setErrors(errorMap);
+          } else {
+            setErrors({ general: message });
+          }
         }
-      } else {
-        setErrors({ general: 'An error occurred. Please try again.' });
-      }
+      );
+    } catch (error) {
+      console.error('Signup error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  /**
+   * Handle form input changes
+   * @param {Event} e - Form event
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: '' });
+    setErrors({ ...errors, [name]: '', general: '' });
+  };
+
+  /**
+   * Handle Google signup
+   */
+  const handleGoogleSignup = () => {
+    authController.googleAuth('signup');
   };
 
   return (
@@ -97,14 +123,14 @@ const Signup = () => {
           >
             Prioritize your well-being with daily tracking, smart reminders, and mental health support. Achieve balance effortlessly.
           </motion.p>
-          <motion.a
-            href="/login"
+          <motion.Link
+            to="/login"
             className="mt-6 inline-block bg-custom-green-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-custom-green-700 transition initiative duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign In
-          </motion.a>
+          </motion.Link>
         </div>
       </motion.div>
 
@@ -241,7 +267,7 @@ const Signup = () => {
           </div>
           {/* Google Sign-Up Button */}
           <motion.button
-            onClick={signupWithGoogle}
+            onClick={handleGoogleSignup}
             className="w-full bg-white bg-opacity-20 backdrop-blur-md border border-white border-opacity-20 text-gray-900 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-custom-green-100 transition-all duration-300"
             whileHover={{ scale: 1.05, translateY: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -266,10 +292,17 @@ const Signup = () => {
             </svg>
             Sign Up with Google
           </motion.button>
+          {/* Sign In Link */}
+          <p className="text-center mt-6 text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="text-custom-green-600 hover:underline">
+              Sign In
+            </Link>
+          </p>
         </motion.div>
       </div>
     </div>
   );
 };
 
-export default Signup;
+export default SignupView;

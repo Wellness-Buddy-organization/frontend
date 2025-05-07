@@ -24,7 +24,7 @@ function Notification({ message, type, onClose }) {
   );
 }
 
-const Settings = () => {
+const SettingsView = () => {
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkMode, setDarkMode] = useState(false); // disabled for now
@@ -52,7 +52,7 @@ const Settings = () => {
       return;
     }
     // Simulate save (replace with real API call)
-    setNotif({ message: 'Account settings saved!', type: 'success' });
+    setNotif({ message: 'Account settingsViewSettingsView saved!', type: 'success' });
     setTimeout(() => setNotif({ message: '', type: '' }), 2000);
   };
 
@@ -63,7 +63,7 @@ const Settings = () => {
       exit={{ opacity: 0 }}
       className="max-w-3xl mx-auto"
     >
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Settings</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">SettingsView</h1>
 
       <AnimatePresence>
         {notif.message && (
@@ -78,7 +78,7 @@ const Settings = () => {
       <div className="bg-white bg-opacity-80 backdrop-blur-md rounded-2xl shadow-lg border border-emerald-100 p-8">
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-800 border-b border-gray-100 pb-2">
-            Application Settings
+            Application SettingsView
           </h2>
 
           <div className="flex items-center justify-between py-2">
@@ -134,7 +134,7 @@ const Settings = () => {
           </div>
 
           <h2 className="text-xl font-semibold text-gray-800 border-b border-gray-100 pb-2 mt-8">
-            Account Settings
+            Account SettingsView
           </h2>
 
           <form className="space-y-4" onSubmit={handleAccountSave} autoComplete="off">
@@ -182,4 +182,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default SettingsView;

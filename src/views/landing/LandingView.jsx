@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import StatCard from '../components/StatCard';
 import FeatureCard from '../components/FeatureCard';
-import { fetchStats } from '../services/statsService';
+import { fetchStats } from '../../services/statsService';
 
-const Landing = () => {
+const LandingView = () => {
   const [stats, setStats] = useState({ users: 0, programs: 0, reminders: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const heroRef = useRef(null);
@@ -317,4 +317,4 @@ const Landing = () => {
   );
 };
 
-export default Landing;
+export default LandingView;
