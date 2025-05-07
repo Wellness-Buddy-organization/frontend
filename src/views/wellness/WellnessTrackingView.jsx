@@ -769,9 +769,29 @@ const WellnessTrackingView = () => {
     }
     
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    return stats.dailyCheckins.some(checkin => 
-      new Date(checkin.date).toISOString().split('T')[0] === today
-    );
+    
+    // Check if any check-in has a valid date matching today
+    return stats.dailyCheckins.some(checkin => {
+      // Handle cases where checkin.date might not exist
+      if (!checkin.date) {
+        // If no date, check if it was added today (assuming first item is most recent)
+        return stats.dailyCheckins.indexOf(checkin) === 0;
+      }
+      
+      try {
+        // Make sure the date is valid before trying to convert it
+        const checkinDate = new Date(checkin.date);
+        // Check if the date is valid
+        if (isNaN(checkinDate.getTime())) {
+          return false;
+        }
+        return checkinDate.toISOString().split('T')[0] === today;
+      } catch (error) {
+        // If any error occurs during date conversion, assume it's not today
+        console.error("Error processing date:", error);
+        return false;
+      }
+    });
   };
   
   return (

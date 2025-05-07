@@ -1,3 +1,5 @@
+// src/controllers/DashboardController.js - Fixed
+
 import { wellnessService } from '../services';
 
 /**
@@ -21,7 +23,7 @@ class DashboardController {
       
       return data;
     } catch (error) {
-      if (error.message === 'canceled') {
+      if (error.name === 'AbortError' || error.message === 'canceled') {
         // Request was canceled, no need to handle
         return;
       }
@@ -34,7 +36,7 @@ class DashboardController {
           } else if (error.response.status === 419 || error.response.status === 440) {
             onError('Session timeout', 'timeout');
           } else {
-            onError(error.response.data.message || 'Failed to load dashboard data');
+            onError(error.response.data?.message || 'Failed to load dashboard data');
           }
         } else {
           onError(error.message || 'Failed to load dashboard data');
@@ -63,9 +65,9 @@ class DashboardController {
     // Create wellness data
     const wellnessData = dashboardData.wellness || {};
     
-    // Calculate additional metrics if needed
-    const wellnessScore = wellnessData.calculateWellnessScore ? 
-      wellnessData.calculateWellnessScore() : 0;
+    // Calculate wellness score
+    const wellnessScore = wellnessData.score || 
+      (wellnessData.calculateWellnessScore ? wellnessData.calculateWellnessScore() : 0);
     
     // Process work-life balance data
     const workLifeBalanceData = dashboardData.workLifeBalance || {};
