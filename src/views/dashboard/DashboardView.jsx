@@ -1,7 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChartBarIcon, HeartIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import { 
+  ChartBarIcon, 
+  HeartIcon, 
+  BriefcaseIcon,
+  ArrowPathIcon 
+} from "@heroicons/react/24/outline";
 import { dashboardController } from "../../controllers";
 import WellnessCard from "../components/WellnessCard";
 
