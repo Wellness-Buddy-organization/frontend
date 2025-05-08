@@ -11,7 +11,7 @@ const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-emerald-50 to-teal-50">
+    <div className="flex h-screen">
       {/* Sidebar for navigation */}
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
       

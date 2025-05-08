@@ -112,6 +112,37 @@ class WellnessController {
   }
 
   /**
+ * Fetch dashboard data
+ * @param {AbortSignal} signal - Optional abort signal for cancellation
+ * @returns {Promise<Object>} Dashboard data
+ */
+async fetchDashboard(signal) {
+  try {
+    const response = await apiService.get('/dashboard/me', { signal });
+    
+    // Convert API data to model instances
+    const wellnessData = WellnessData.fromApiResponse(response.data.wellness);
+    const workLifeBalance = response.data.workLifeBalance ? 
+      WorkLifeBalance.fromApiResponse(response.data.workLifeBalance) : 
+      null;
+    
+    // Format reminders if they exist
+    const reminders = response.data.reminders ? 
+      response.data.reminders.map(item => Reminder.fromApiResponse(item)) : 
+      [];
+    
+    return {
+      user: response.data.user,
+      wellness: wellnessData,
+      workLifeBalance,
+      reminders
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+  /**
    * Convert mood value to label
    * @private
    * @param {number} moodValue - Mood value (1-5)

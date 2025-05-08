@@ -162,6 +162,32 @@ class ReminderController {
   }
 
   /**
+ * Get upcoming reminders
+ * @param {Object} options - Query options
+ * @returns {Promise<Array>} List of upcoming reminders
+ */
+async getUpcomingReminders(options = {}) {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    // Add upcoming flag
+    queryParams.append('upcoming', 'true');
+    
+    // Add limit if provided
+    if (options.limit) {
+      queryParams.append('limit', options.limit);
+    }
+    
+    const response = await apiService.get(`/reminder?${queryParams.toString()}`);
+    
+    // Convert API data to model instances
+    return response.data.map(item => Reminder.fromApiResponse(item));
+  } catch (error) {
+    throw error;
+  }
+}
+
+  /**
    * Get default sound for reminder type
    * @private
    * @param {string} type - Reminder type

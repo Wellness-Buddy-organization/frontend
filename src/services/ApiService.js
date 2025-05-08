@@ -1,3 +1,5 @@
+// src/services/ApiService.js - update interceptors
+
 import axios from 'axios';
 
 /**
@@ -28,6 +30,11 @@ class ApiService {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
+        // Don't process canceled requests as errors
+        if (axios.isCancel(error)) {
+          return Promise.reject(error);
+        }
+        
         // Handle session timeout or unauthorized access
         if (error.response && (error.response.status === 401 || error.response.status === 419 || error.response.status === 440)) {
           // Clear token and redirect to login page if needed
