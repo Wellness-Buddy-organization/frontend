@@ -98,8 +98,6 @@ const SignupView = () => {
         className="lg:w-1/2 w-full h-64 lg:h-screen flex items-center justify-center relative overflow-hidden"
         style={{
           background: 'linear-gradient(45deg, #A8D5BA, #6BBF8A, #489B6E, #A8D5BA)',
-          backgroundSize: '400% 400%',
-          animation: 'gradientFlow 15s ease infinite',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -123,14 +121,14 @@ const SignupView = () => {
           >
             Prioritize your well-being with daily tracking, smart reminders, and mental health support. Achieve balance effortlessly.
           </motion.p>
-          <motion.Link
+          <Link
             to="/login"
             className="mt-6 inline-block bg-custom-green-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:bg-custom-green-700 transition initiative duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign In
-          </motion.Link>
+          </Link>
         </div>
       </motion.div>
 

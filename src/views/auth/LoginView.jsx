@@ -249,9 +249,7 @@ const LoginView = () => {
       <motion.div
         className="lg:w-1/2 w-full h-64 lg:h-screen flex items-center justify-center relative overflow-hidden"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1497366754035-f200fff6a01f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: `linear-gradient(45deg, #A8D5BA, #6BBF8A, #489B6E, #A8D5BA)`,
         }}
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -275,14 +273,14 @@ const LoginView = () => {
           >
             Enter your personal details and start your journey with us.
           </motion.p>
-          <motion.Link
+          <Link
             to="/signup"
             className="inline-block bg-custom-green-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:bg-custom-green-800 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign Up
-          </motion.Link>
+          </Link>
         </div>
       </motion.div>
     </div>
