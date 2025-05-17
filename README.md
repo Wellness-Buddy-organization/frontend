@@ -17,32 +17,32 @@ In today's fast-paced digital environment, individuals often struggle to maintai
 
 ## Core Features
 
-- *Wellness Tracking*: Monitor mood, sleep, hydration, and work hours with visual analytics
-- *Smart Reminders*: Set customizable reminders for water intake, breaks, posture checks, and meditation
-- *Mental Health Support*: Guided meditation, breathing exercises, reflective journaling, and crisis resources
-- *Work-Life Balance Tools*: Time allocation tracking, balance challenges, work hour monitoring, and achievement recognition
+- **Wellness Tracking**: Monitor mood, sleep, hydration, and work hours with visual analytics
+- **Smart Reminders**: Set customizable reminders for water intake, breaks, posture checks, and meditation
+- **Mental Health Support**: Guided meditation, breathing exercises, reflective journaling, and crisis resources
+- **Work-Life Balance Tools**: Time allocation tracking, balance challenges, work hour monitoring, and achievement recognition
 
 ## Architecture
 
 The application follows the MVC (Model-View-Controller) architecture pattern:
 
-- *Models*: Data structures that define wellness metrics, reminders, user information (see src/models/)
-- *Views*: React components handling user interface and rendering (see src/views/)
-- *Controllers*: Logic for handling user actions and data manipulation (see src/controllers/)
+- **Models**: Data structures that define wellness metrics, reminders, user information (see `src/models/`)
+- **Views**: React components handling user interface and rendering (see `src/views/`)
+- **Controllers**: Logic for handling user actions and data manipulation (see `src/controllers/`)
 
 ## Tech Stack
 
 ### Frontend
-- *Framework*: React.js (v19.0.0)
-- *Routing*: React Router (v7.5.2)
-- *Styling*: Tailwind CSS
-- *Animations*: Framer Motion
-- *Build Tool*: Vite
-- *HTTP Client*: Axios
+- **Framework**: React.js (v19.0.0)
+- **Routing**: React Router (v7.5.2)
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **Build Tool**: Vite
+- **HTTP Client**: Axios
 
 ### Backend
-- *API*: RESTful API endpoints (hosted on Railway)
-- *Authentication*: JWT-based authentication
+- **API**: RESTful API endpoints (hosted on Railway)
+- **Authentication**: JWT-based authentication
 
 ## Setup Instructions
 
@@ -53,35 +53,35 @@ The application follows the MVC (Model-View-Controller) architecture pattern:
 ### Installation
 
 1. Clone the repository
-   bash
+   ```bash
    git clone https://github.com/yourusername/wellness-buddy.git
    cd wellness-buddy
-   
+   ```
 
 2. Install dependencies
-   bash
+   ```bash
    npm install
-   
+   ```
 
 3. Environment Setup
-   - Create a .env file in the root directory and add:
-     
-     VITE_API_URL=https://localhost:5000
-     
+   - Create a `.env` file in the root directory and add:
+     ```
+     VITE_API_URL=https://backend-production-e89cc.up.railway.app/api
+     ```
 
 4. Start the development server
-   bash
+   ```bash
    npm run dev
-   
+   ```
 
 5. Build for production
-   bash
+   ```bash
    npm run build
-   
+   ```
 
 ## Project Structure
 
-
+```
 wellness-buddy/
 ├── .github/               # GitHub related files (workflows, templates)
 ├── public/                # Static files
@@ -130,20 +130,20 @@ wellness-buddy/
 ├── postcss.config.js      # PostCSS configuration
 ├── tailwind.config.js     # Tailwind CSS configuration
 └── vite.config.js         # Vite configuration
-
+```
 
 ## Architectural Patterns
 
 ### MVC Architecture
 The application implements the Model-View-Controller pattern:
-- *Models*: Define data structures and business rules
-- *Views*: Handle rendering and user interface
-- *Controllers*: Manage application logic and data flow
+- **Models**: Define data structures and business rules
+- **Views**: Handle rendering and user interface
+- **Controllers**: Manage application logic and data flow
 
 ### Additional Patterns
-- *Repository Pattern*: For data access abstraction (in service layers)
-- *Observer Pattern*: For state management and UI updates
-- *Component-Based Architecture*: For building reusable UI elements
+- **Repository Pattern**: For data access abstraction (in service layers)
+- **Observer Pattern**: For state management and UI updates
+- **Component-Based Architecture**: For building reusable UI elements
 
 ## Documentation
 
@@ -160,6 +160,9 @@ The application implements the Model-View-Controller pattern:
 - [Blog 11: State Management and Data Flow in Wellness-Buddy](https://medium.com/@kodithuwakkumadhumini12/state-management-and-data-flow-in-wellness-buddy-e3cce3fe7389)
 - [Blog 12: Designing Effective REST APIs for Health Tracking: Lessons from the Wellness-Buddy Project](https://medium.com/@hashansooriyage/designing-effective-rest-apis-for-health-tracking-lessons-from-the-wellness-buddy-project-68d675c44a59)
 - [Blog 13: Reusable UI Component Design for Wellness Apps](https://medium.com/@kodithuwakkumadhumini12/reusable-ui-component-design-for-wellness-apps-d0879235739b)
+- [API Documentation](./docs/api.md)
+- [Architecture Diagrams](./docs/architecture.md)
+- [Development Guidelines](./docs/development.md)
 - [API Documentation](./docs/api.md)
 - [Architecture Diagrams](./docs/architecture.md)
 - [Development Guidelines](./docs/development.md)
