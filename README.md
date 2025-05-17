@@ -163,9 +163,6 @@ The application implements the Model-View-Controller pattern:
 - [API Documentation](./docs/api.md)
 - [Architecture Diagrams](./docs/architecture.md)
 - [Development Guidelines](./docs/development.md)
-- [API Documentation](./docs/api.md)
-- [Architecture Diagrams](./docs/architecture.md)
-- [Development Guidelines](./docs/development.md)
 
 ## License
 
