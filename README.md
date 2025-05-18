@@ -160,6 +160,7 @@ The application implements the Model-View-Controller pattern:
 - [Blog 11: State Management and Data Flow in Wellness-Buddy](https://medium.com/@kodithuwakkumadhumini12/state-management-and-data-flow-in-wellness-buddy-e3cce3fe7389)
 - [Blog 12: Designing Effective REST APIs for Health Tracking: Lessons from the Wellness-Buddy Project](https://medium.com/@hashansooriyage/designing-effective-rest-apis-for-health-tracking-lessons-from-the-wellness-buddy-project-68d675c44a59)
 - [Blog 13: Reusable UI Component Design for Wellness Apps](https://medium.com/@kodithuwakkumadhumini12/reusable-ui-component-design-for-wellness-apps-d0879235739b)
+- [Blog 14: Testing Health Applications: A Comprehensive Approach from the Wellness-Buddy Project](https://medium.com/@hashansooriyage/testing-health-applications-a-comprehensive-approach-from-the-wellness-buddy-project-ec6a5799758b)
 - [API Documentation](./docs/api.md)
 - [Architecture Diagrams](./docs/architecture.md)
 - [Development Guidelines](./docs/development.md)
